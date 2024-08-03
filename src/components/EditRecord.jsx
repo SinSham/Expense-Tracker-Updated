@@ -31,7 +31,7 @@ export const EditRecord = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const editedRecord = await ExpensesAPI.put(`/expenses/${id}`, {
+        await ExpensesAPI.put(`/expenses/${id}`, {
             category,
             description,
             amount,

@@ -34,7 +34,7 @@ const ExpenseTable = () => {
     };
 
     fetchData();
-  }, []);
+  }, [setExpenses]);
 
   const handleEdit = async (id) => {
     navigate(`/expenses/${id}/edit`);
@@ -42,7 +42,7 @@ const ExpenseTable = () => {
 
   const handleDelete = async (id) => {
     try {
-      const response = await ExpensesAPI.delete(`/expenses/${id}`);
+      await ExpensesAPI.delete(`/expenses/${id}`);
       setExpenses(expenses.filter(expense => expense.id !== id));
     } catch (err) {
       console.log(err);
