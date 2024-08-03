@@ -2,10 +2,9 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ExpensesAPI from '../apis/ExpensesAPI';
 import { ExpenseContext } from '../context/ExpenseContext';
-import ExpenseChart from './ExpenseChart';
 import moment from 'moment';
 
-const ExpenseTable = (props) => {
+const ExpenseTable = () => {
   const { expenses, setExpenses } = useContext(ExpenseContext);
   const navigate = useNavigate();
 
@@ -18,10 +17,16 @@ const ExpenseTable = (props) => {
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
 
+  const [filterCategory, setFilterCategory] = useState('');
+  const categories = [
+    'Housing', 'Utilities', 'Food', 'Education', 'Travel', 
+    'Health & Medical', 'Debt', 'Insurance', 'Miscellaneous'
+  ];
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await ExpensesAPI.get('/');
+        const response = await ExpensesAPI.get('/expenses');
         setExpenses(response.data.data.Expenses);
       } catch (err) {
         console.log(err);
@@ -37,7 +42,7 @@ const ExpenseTable = (props) => {
 
   const handleDelete = async (id) => {
     try {
-      const response = await ExpensesAPI.delete(`/${id}`);
+      const response = await ExpensesAPI.delete(`/expenses/${id}`);
       setExpenses(expenses.filter(expense => expense.id !== id));
     } catch (err) {
       console.log(err);
@@ -52,47 +57,38 @@ const ExpenseTable = (props) => {
     setFilterMonth(e.target.value);
   };
 
+  const handleCategoryFilterChange = (e) => {
+    setFilterCategory(e.target.value);
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
   const filteredExpenses = expenses.filter(expense => {
     const expenseDate = new Date(expense.date);
     return (
       (!filterYear || expenseDate.getFullYear() === parseInt(filterYear)) &&
-      (!filterMonth || expenseDate.getMonth() === parseInt(filterMonth))
+      (!filterMonth || expenseDate.getMonth() === parseInt(filterMonth)) &&
+      (!filterCategory || expense.category === filterCategory)
     );
   });
 
-  const groupExpensesByMonth = (expenses) => {
-    const groupedExpenses = {};
-
-    expenses.forEach(expense => {
-      const month = new Date(expense.date).toLocaleString('default', { month: 'long' });
-      if (!groupedExpenses[month]) {
-        groupedExpenses[month] = { month, total: 0 };
-      }
-      groupedExpenses[month].total += Number(expense.amount);
-    });
-
-    return Object.values(groupedExpenses);
-  };
-
-  const groupedExpenses = groupExpensesByMonth(filteredExpenses);
-
-  const chartData = {
-    labels: groupedExpenses.map(item => item.month),
-    datasets: [
-      {
-        label: 'Total Expenses',
-        data: groupedExpenses.map(item => item.total),
-        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-        borderColor: 'rgba(255, 99, 132, 1)',
-        borderWidth: 1,
-      },
-    ],
-  };
-
   return (
     <div className="container mt-4">
-      <div className="row mb-3">
-        <div className="col-md-6">
+      <h4 className="mb-4 mt-6 text-secondary no-print">Apply Filters</h4>
+      <div className="row mb-3 no-print">
+      <div className="col-md-4">
+          <select value={filterCategory} onChange={handleCategoryFilterChange} className='form-control mb-2'>
+            <option value="">All Categories</option>
+            {categories.map(category => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="col-md-4">
           <select value={filterYear} onChange={handleYearFilterChange} className='form-control mb-2'>
             <option value="">All Years</option>
             {years.map(year => (
@@ -102,7 +98,7 @@ const ExpenseTable = (props) => {
             ))}
           </select>
         </div>
-        <div className="col-md-6">
+        <div className="col-md-4">
           <select value={filterMonth} onChange={handleMonthFilterChange} className='form-control mb-2'>
             <option value="">All Months</option>
             {months.map((month, index) => (
@@ -121,8 +117,8 @@ const ExpenseTable = (props) => {
               <th scope='col'>Description</th>
               <th scope='col'>Amount</th>
               <th scope='col'>Date</th>
-              <th scope='col'>Edit</th>
-              <th scope='col'>Delete</th>
+              <th scope='col' className='no-print'>Edit</th>
+              <th scope='col' className='no-print'>Delete</th>
             </tr>
           </thead>
           <tbody>
@@ -132,16 +128,14 @@ const ExpenseTable = (props) => {
                 <td>{el.description}</td>
                 <td>{el.amount}</td>
                 <td>{moment(el.date).format('YYYY-MM-DD')}</td>
-                <td><button onClick={() => handleEdit(el.id)} className='btn btn-warning btn-sm'>Edit</button></td>
-                <td><button onClick={() => handleDelete(el.id)} className='btn btn-danger btn-sm'>Delete</button></td>
+                <td className='no-print'><button onClick={() => handleEdit(el.id)} className='btn btn-warning btn-sm'>Edit</button></td>
+                <td className='no-print'><button onClick={() => handleDelete(el.id)} className='btn btn-danger btn-sm'>Delete</button></td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <div className="mt-4">
-        <ExpenseChart chartData={chartData} />
-      </div>
+      <button onClick={handlePrint} className="btn btn-primary mt-3">Print</button>
     </div>
   );
 };

@@ -13,7 +13,7 @@ export const EditRecord = () => {
     useEffect(() => {
         const fetchData = async() => {
             try{
-                const response = await ExpensesAPI.get(`/${id}`);
+                const response = await ExpensesAPI.get(`/expenses/${id}`);
                 setCategory(response.data.data.Expense[0].category);
                 setDescription(response.data.data.Expense[0].description);
                 setAmount(response.data.data.Expense[0].amount);
@@ -31,7 +31,7 @@ export const EditRecord = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const editedRecord = await ExpensesAPI.put(`/${id}`, {
+        const editedRecord = await ExpensesAPI.put(`/expenses/${id}`, {
             category,
             description,
             amount,

@@ -7,7 +7,9 @@ export const ExpenseContextProvider = props => {
     const [ expenses, setExpenses ] = useState([]);
 
     const addExpense = (expense) => {
-        setExpenses([...expenses, expense]);
+        const updatedExpenses = [...expenses, expense];
+        updatedExpenses.sort((a, b) => new Date(b.date) - new Date(a.date));
+        setExpenses(updatedExpenses);
     }
 
     return (

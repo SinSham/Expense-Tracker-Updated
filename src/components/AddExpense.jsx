@@ -1,6 +1,8 @@
 import React, { useContext, useState } from 'react'
 import ExpensesAPI from '../apis/ExpensesAPI';
 import { ExpenseContext } from '../context/ExpenseContext';
+import { toast } from 'react-toastify';
+
 
 const AddExpense = () => {
     const { addExpense } = useContext(ExpenseContext);
@@ -12,20 +14,23 @@ const AddExpense = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try{
-            const response = await ExpensesAPI.post('/', {
+            const response = await ExpensesAPI.post('/expenses', {
                 category,
                 description,
                 amount,
                 date,
             })
             addExpense(response.data.results)
+            toast.success("Expense added successfully!");
         }catch(err){
-            console.log(err)
+            console.log(err);
+            toast.error("Failed to add expense");
         }
     }
 
   return (
-    <div className='container mb-4'>
+    <div className='container mb-4 no-print'>
+        <h4 className="mb-4 mt-6 text-secondary">Add New Expense</h4>
         <form>
             <div className="form-row align-items-center">
                 <select className="form-control col mb-2" value={category} onChange={e => setCategory(e.target.value)} >
